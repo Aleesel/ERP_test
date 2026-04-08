@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестирование ЕРП 2.5</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .menu {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .menu-section {
+            margin-bottom: 30px;
+        }
+        
+        .menu-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .quiz-container {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .answers-list {
+            list-style: none;
+        }
+        
+        .answer-item {
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .answer-item:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+        
+        .answer-item.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .answer-item.correct {
+            border-color: #38ef7d;
+            background: #38ef7d;
+            color: white;
+        }
+        
+        .answer-item.incorrect {
+            border-color: #eb3349;
+            background: #eb3349;
+            color: white;
+        }
+        
+        .quiz-footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-container {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .result-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        
+        .errors-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .error-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #fff3f3;
+            border-left: 4px solid #eb3349;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .error-item:hover {
+            background: #ffe0e0;
+        }
+        
+        .block-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .block-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .block-btn.active, .block-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .checkbox-item input {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Тестирование ЕРП 2.5</h1>
+        
+        <!-- Главное меню -->
+        <div id="mainMenu" class="menu">
+            <div class="menu-section">
+                <h2>🎯 Режимы тестирования</h2>
+                
+                <div class="input-group">
+                    <label>Количество вопросов:</label>
+                    <input type="number" id="questionCount" min="1" max="802" value="20">
+                </div>
+                
+                <div class="input-group">
+                    <label>Выберите блоки:</label>
+                    <div class="checkbox-group" id="blockCheckboxes"></div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="startQuiz()">Начать тестирование</button>
+                <button class="btn btn-success" onclick="startExam()">Экзамен (14 вопросов из каждого блока)</button>
+            </div>
+            
+            <div class="menu-section">
+                <h2>📊 Статистика</h2>
+                <div class="stats-grid" id="statsGrid"></div>
+                <button class="btn btn-secondary" onclick="showErrors()" style="margin-top: 15px;">📝 Работа над ошибками</button>
+                <button class="btn btn-danger" onclick="resetStats()" style="margin-top: 15px;">🗑️ Сбросить статистику</button>
+            </div>
+        </div>
+        
+        <!-- Контейнер теста -->
+        <div id="quizContainer" class="quiz-container">
+            <div class="quiz-header">
+                <span id="questionCounter">Вопрос 1 из 20</span>
+                <span id="scoreCounter">Правильно: 0</span>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            
+            <div class="question-text" id="questionText"></div>
+            
+            <ul class="answers-list" id="answersList"></ul>
+            
+            <div class="quiz-footer">
+                <button class="btn btn-secondary" onclick="showMainMenu()">Выход</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Далее</button>
+            </div>
+        </div>
+        
+        <!-- Результаты -->
+        <div id="resultContainer" class="result-container">
+            <h2>Тестирование завершено!</h2>
+            <div class="result-score" id="finalScore">0%</div>
+            <p id="resultText"></p>
+            <button class="btn btn-primary" onclick="showMainMenu()">Вернуться в меню</button>
+        </div>
+        
+        <!-- Ошибки -->
+        <div id="errorsContainer" class="errors-section">
+            <h2>📝 Работа над ошибками</h2>
+            <div class="block-filter" id="errorBlockFilter"></div>
+            <div id="errorsList"></div>
+            <button class="btn btn-secondary" onclick="showMainMenu()" style="margin-top: 20px;">Назад</button>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let allQuestions = [];
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let stats = {
+            blocks: {},
+            errors: []
+        };
+        
+        // Загрузка вопросов
+        async function loadQuestions() {
+            try {
+                const response = await fetch('questions.json');
+                allQuestions = await response.json();
+                loadStats();
+                initBlockCheckboxes();
+                updateStatsDisplay();
+            } catch (error) {
+                console.error('Ошибка загрузки вопросов:', error);
+                alert('Ошибка загрузки вопросов!');
+            }
+        }
+        
+        // Инициализация чекбоксов блоков
+        function initBlockCheckboxes() {
+            const container = document.getElementById('blockCheckboxes');
+            const blocks = [...new Set(allQuestions.map(q => q.block))].sort((a, b) => a - b);
+            
+            container.innerHTML = '<label class="checkbox-item"><input type="checkbox" checked onchange="toggleAllBlocks(this)"> Все блоки</label>';
+            
+            blocks.forEach(block => {
+                const count = allQuestions.filter(q => q.block === block).length;
+                container.innerHTML += `
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="${block}" checked> Блок ${block} (${count})
+                    </label>
+                `;
+            });
+        }
+        
+        function toggleAllBlocks(checkbox) {
+            const checkboxes = document.querySelectorAll('#blockCheckboxes input[type="checkbox"]:not(:first-child)');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+        }
+        
+        // Загрузка статистики
+        function loadStats() {
+            const saved = localStorage.getItem('erp25_stats');
+            if (saved) {
+                stats = JSON.parse(saved);
+            } else {
+                // Инициализация статистики по блокам
+                const blocks = [...new Set(allQuestions.map(q => q.block))];
+                blocks.forEach(block => {
+                    stats.blocks[block] = { correct: 0, incorrect: 0 };
+                });
+            }
+        }
+        
+        // Сохранение статистики
+        function saveStats() {
+            localStorage.setItem('erp25_stats', JSON.stringify(stats));
+        }
+        
+        // Обновление отображения статистики
+        function updateStatsDisplay() {
+            const grid = document.getElementById('statsGrid');
+            let totalCorrect = 0;
+            let totalIncorrect = 0;
+            
+            let html = '';
+            Object.entries(stats.blocks).forEach(([block, data]) => {
+                const total = data.correct + data.incorrect;
+                const percent = total > 0 ? Math.round((data.correct / total) * 100) : 0;
+                totalCorrect += data.correct;
+                totalIncorrect += data.incorrect;
+                
+                html += `
+                    <div class="stat-card">
+                        <div class="value">${percent}%</div>
+                        <div class="label">Блок ${block}</div>
+                        <div style="font-size: 11px; color: #999;">${data.correct}/${total}</div>
+                    </div>
+                `;
+            });
+            
+            const overall = totalCorrect + totalIncorrect > 0 
+                ? Math.round((totalCorrect / (totalCorrect + totalIncorrect)) * 100) 
+                : 0;
+            
+            grid.innerHTML = `
+                <div class="stat-card" style="background: #e8f5e9;">
+                    <div class="value" style="color: #11998e;">${overall}%</div>
+                    <div class="label">Общий результат</div>
+                    <div style="font-size: 11px; color: #999;">${totalCorrect}/${totalCorrect + totalIncorrect}</div>
+                </div>
+                ${html}
+            `;
+        }
+        
+        // Получение выбранных блоков
+        function getSelectedBlocks() {
+            const checkboxes = document.querySelectorAll('#blockCheckboxes input[type="checkbox"]:not(:first-child):checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.value));
+        }
+        
+        // Начало тестирования
+        function startQuiz() {
+            const count = parseInt(document.getElementById('questionCount').value);
+            const blocks = getSelectedBlocks();
+            
+            if (blocks.length === 0) {
+                alert('Выберите хотя бы один блок!');
+                return;
+            }
+            
+            // Фильтрация вопросов по блокам
+            let filtered = allQuestions.filter(q => blocks.includes(q.block));
+            
+            if (filtered.length === 0) {
+                alert('Нет вопросов в выбранных блоках!');
+                return;
+            }
+            
+            // Перемешивание и выбор нужного количества
+            filtered = shuffleArray(filtered);
+            currentQuestions = filtered.slice(0, Math.min(count, filtered.length));
+            
+            if (currentQuestions.length === 0) {
+                alert('Недостаточно вопросов для выбранного количества!');
+                return;
+            }
+            
+            currentIndex = 0;
+            score = 0;
+            showQuiz();
+        }
+        
+        // Начало экзамена
+        function startExam() {
+            const blocks = [...new Set(allQuestions.map(q => q.block))].sort((a, b) => a - b);
+            currentQuestions = [];
+            
+            // По 14 вопросов из каждого блока
+            blocks.forEach(block => {
+                let blockQuestions = allQuestions.filter(q => q.block === block);
+                blockQuestions = shuffleArray(blockQuestions);
+                currentQuestions.push(...blockQuestions.slice(0, 14));
+            });
+            
+            currentQuestions = shuffleArray(currentQuestions);
+            currentIndex = 0;
+            score = 0;
+            showQuiz();
+        }
+        
+        // Перемешивание массива
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        // Показать тест
+        function showQuiz() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('errorsContainer').style.display = 'none';
+            showQuestion();
+        }
+        
+        // Показать вопрос
+        function showQuestion() {
+            const question = currentQuestions[currentIndex];
+            
+            document.getElementById('questionCounter').textContent = 
+                `Вопрос ${currentIndex + 1} из ${currentQuestions.length}`;
+            document.getElementById('scoreCounter').textContent = 
+                `Правильно: ${score}`;
+            document.getElementById('progressFill').style.width = 
+                `${((currentIndex + 1) / currentQuestions.length) * 100}%`;
+            
+            document.getElementById('questionText').textContent = 
+                `${question.id}. ${question.question}`;
+            
+            const answersList = document.getElementById('answersList');
+            answersList.innerHTML = '';
+            
+            // Перемешиваем ответы
+            const shuffledAnswers = shuffleArray([...question.answers]);
+            
+            shuffledAnswers.forEach(answer => {
+                const li = document.createElement('li');
+                li.className = 'answer-item';
+                li.textContent = `${answer.num}. ${answer.text}`;
+                li.onclick = () => selectAnswer(li, answer.num, question);
+                answersList.appendChild(li);
+            });
+            
+            selectedAnswer = null;
+            document.getElementById('nextBtn').disabled = true;
+        }
+        
+        // Выбор ответа
+        function selectAnswer(element, answerNum, question) {
+            // Убираем выделение со всех
+            document.querySelectorAll('.answer-item').forEach(el => {
+                el.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            element.classList.add('selected');
+            selectedAnswer = answerNum;
+            document.getElementById('nextBtn').disabled = false;
+            
+            // Сохраняем текущий вопрос и ответ для обработки
+            window.currentQuestionData = { question, selectedAnswer: answerNum };
+        }
+        
+        // Следующий вопрос
+        function nextQuestion() {
+            const { question, selectedAnswer } = window.currentQuestionData;
+            
+            // Показываем правильный ответ (первый по умолчанию, так как в файле нет правильных ответов)
+            // Пользователь сам определяет правильный ответ при обучении
+            const isCorrect = confirm(`Ваш ответ: ${selectedAnswer}\n\nНажмите OK, если ответ ПРАВИЛЬНЫЙ, или Отмена, если НЕПРАВИЛЬНЫЙ`);
+            
+            // Обновляем статистику
+            const block = question.block;
+            if (!stats.blocks[block]) {
+                stats.blocks[block] = { correct: 0, incorrect: 0 };
+            }
+            
+            if (isCorrect) {
+                score++;
+                stats.blocks[block].correct++;
+            } else {
+                stats.blocks[block].incorrect++;
+                // Добавляем в ошибки
+                stats.errors.push({
+                    questionId: question.id,
+                    block: block,
+                    question: question.question,
+                    userAnswer: selectedAnswer,
+                    timestamp: Date.now()
+                });
+            }
+            
+            saveStats();
+            updateStatsDisplay();
+            
+            currentIndex++;
+            
+            if (currentIndex >= currentQuestions.length) {
+                showResults();
+            } else {
+                showQuestion();
+            }
+        }
+        
+        // Показать результаты
+        function showResults() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'block';
+            
+            const percent = Math.round((score / currentQuestions.length) * 100);
+            document.getElementById('finalScore').textContent = `${percent}%`;
+            document.getElementById('resultText').textContent = 
+                `Вы ответили правильно на ${score} из ${currentQuestions.length} вопросов`;
+        }
+        
+        // Показать главное меню
+        function showMainMenu() {
+            document.getElementById('mainMenu').style.display = 'block';
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('errorsContainer').style.display = 'none';
+            updateStatsDisplay();
+        }
+        
+        // Показать ошибки
+        function showErrors() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('errorsContainer').style.display = 'block';
+            
+            renderErrorsList();
+            renderErrorBlockFilter();
+        }
+        
+        // Рендер фильтра по блокам для ошибок
+        function renderErrorBlockFilter() {
+            const blocks = [...new Set(stats.errors.map(e => e.block))].sort((a, b) => a - b);
+            const container = document.getElementById('errorBlockFilter');
+            
+            container.innerHTML = '<button class="block-btn active" onclick="filterErrors(\'all\')">Все</button>';
+            
+            blocks.forEach(block => {
+                container.innerHTML += `<button class="block-btn" onclick="filterErrors(${block})">Блок ${block}</button>`;
+            });
+        }
+        
+        // Фильтрация ошибок
+        function filterErrors(block) {
+            document.querySelectorAll('.block-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderErrorsList(block === 'all' ? null : block);
+        }
+        
+        // Рендер списка ошибок
+        function renderErrorsList(filterBlock = null) {
+            const container = document.getElementById('errorsList');
+            let errors = stats.errors;
+            
+            if (filterBlock) {
+                errors = errors.filter(e => e.block === filterBlock);
+            }
+            
+            if (errors.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">Ошибок пока нет! Отличная работа! 🎉</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            errors.forEach((error, index) => {
+                const div = document.createElement('div');
+                div.className = 'error-item';
+                div.innerHTML = `
+                    <strong>Блок ${error.block}, Вопрос ${error.questionId}</strong><br>
+                    ${error.question}<br>
+                    <small style="color: #eb3349;">Ваш ответ: ${error.userAnswer}</small>
+                `;
+                div.onclick = () => retryQuestion(error);
+                container.appendChild(div);
+            });
+        }
+        
+        // Повторение вопроса с ошибкой
+        function retryQuestion(errorData) {
+            // Находим оригинальный вопрос
+            const question = allQuestions.find(q => q.id === errorData.questionId);
+            if (!question) return;
+            
+            // Создаем контекст для одного вопроса
+            currentQuestions = [question];
+            currentIndex = 0;
+            score = 0;
+            
+            // Удаляем эту ошибку из списка (будет добавлена снова если ошибется)
+            stats.errors = stats.errors.filter(e => 
+                !(e.questionId === errorData.questionId && e.block === errorData.block)
+            );
+            saveStats();
+            
+            showQuiz();
+        }
+        
+        // Сброс статистики
+        function resetStats() {
+            if (confirm('Вы уверены, что хотите сбросить всю статистику?')) {
+                stats = { blocks: {}, errors: [] };
+                const blocks = [...new Set(allQuestions.map(q => q.block))];
+                blocks.forEach(block => {
+                    stats.blocks[block] = { correct: 0, incorrect: 0 };
+                });
+                saveStats();
+                updateStatsDisplay();
+            }
+        }
+        
+        // Инициализация при загрузке
+        loadQuestions();
+    </script>
+</body>
+</html>
